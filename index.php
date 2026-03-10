@@ -622,7 +622,7 @@ if (isLoggedIn()) {
             </div>
             <div class="nav-actions">
                 
-                <a href="login (1).php" class="btn-login">Login</a>
+                <a href="login.php" class="btn-login">Login</a>
             </div>
             
         </div>

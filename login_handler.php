@@ -74,12 +74,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $_SESSION['error'] = 'Invalid email or password';
         closeDBConnection($conn);
-        header('Location: login%20(1).php');
+        header('Location: login.php');
         exit();
     }
 }
 
 // If GET request, redirect to login form
-header('Location: login%20(1).php');
+header('Location: login.php');
 exit();
 ?>

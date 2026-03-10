@@ -642,7 +642,7 @@ if (isLoggedIn()) {
                 </form>
 
                 <div class="form-footer">
-                    <p>Already have an account? <a href="login%20(1).php">Login here</a></p>
+                    <p>Already have an account? <a href="login.php">Login here</a></p>
                 </div>
             </div>
         </div>
