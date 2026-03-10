@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'config.php';
+require_once 'includes/mailer.php';
 
 // Check if form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -120,16 +121,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Notify Admin
             $adminEmail = 'jijithannickal@gmail.com'; // Default admin email for the system
             $subject = 'New Officer Registration Approval Required';
-            $message = "A new Permit Officer ($full_name, PEN: $spark_pen) has registered and is pending your approval.\nLog in to the Admin Dashboard to verify their account.";
-            // In a real system, send email here. For this miniproject, we'll try to mail
-            @mail($adminEmail, $subject, $message, "From: noreply@sovereignstructures.in");
+            $message = "<strong>New Officer Registration</strong><br><br>";
+            $message .= "A new Permit Officer ($full_name, PEN: $spark_pen) has registered and is pending your approval.<br>";
+            $message .= "Log in to the Admin Dashboard to verify their account.";
+            
+            sendEmail($adminEmail, $subject, $message);
             
             $_SESSION['success'] = 'Registration successful! Your account is pending admin verification before you can login.';
         } else {
             // Welcome email for Applicants
             $subject = "Welcome to Sovereign Structures!";
-            $message = "Dear $full_name,\n\nWelcome to Sovereign Structures! Your account has been successfully created.\n\nYou can now log in to the portal to submit your construction permit applications and track their status.\n\nRegards,\nSovereign Structures Team";
-            @mail($email, $subject, $message, "From: noreply@sovereignstructures.in");
+            $message = "Dear $full_name,<br><br>";
+            $message .= "Welcome to Sovereign Structures! Your account has been successfully created.<br><br>";
+            $message .= "You can now log in to the portal to submit your construction permit applications and track their status.<br><br>";
+            $message .= "Regards,<br>Sovereign Structures Team";
+            
+            sendEmail($email, $subject, $message);
 
             $_SESSION['success'] = 'Registration successful! Please login with your credentials.';
         }

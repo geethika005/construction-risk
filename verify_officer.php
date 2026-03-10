@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'config.php';
+require_once 'includes/mailer.php';
 requireLogin();
 requireRole('Admin');
 
@@ -23,8 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['officer_id']) && isse
                 
                 // Send approval email
                 $subject = "Your Officer Account has been Approved";
-                $message = "Dear $officerName,\n\nCongratulations! Your registration as a Permit Officer has been approved by the administrator.\n\nYou can now log in to the dashboard using your credentials to begin reviewing construction applications.\n\nRegards,\nSovereign Structures Administration";
-                @mail($officerEmail, $subject, $message, "From: noreply@sovereignstructures.in");
+                $message = "Dear $officerName,<br><br>Congratulations! Your registration as a Permit Officer has been approved by the administrator.<br><br>You can now log in to the dashboard using your credentials to begin reviewing construction applications.<br><br>Regards,<br>Sovereign Structures Administration";
+                sendEmail($officerEmail, $subject, $message);
             }
             $stmtOff->close();
 
@@ -47,8 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['officer_id']) && isse
                 
                 // Send rejection email
                 $subject = "Officer Registration Status Update";
-                $message = "Dear $officerName,\n\nWe regret to inform you that your registration as a Permit Officer has been declined.\n\nIf you believe this is a mistake, please contact the system administrator.\n\nRegards,\nSovereign Structures Administration";
-                @mail($officerEmail, $subject, $message, "From: noreply@sovereignstructures.in");
+                $message = "Dear $officerName,<br><br>We regret to inform you that your registration as a Permit Officer has been declined.<br><br>If you believe this is a mistake, please contact the system administrator.<br><br>Regards,<br>Sovereign Structures Administration";
+                sendEmail($officerEmail, $subject, $message);
             }
             $stmtOff->close();
 

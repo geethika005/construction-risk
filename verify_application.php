@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once 'includes/mailer.php';
 requireLogin();
 requireRole('Officer');
 
@@ -126,17 +127,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($applicantEmail)) {
             $displayStatus = ($status === 'Verified') ? 'Approved' : $status;
             $subject = "Construction Permit Application - " . $displayStatus;
-            $message = "Dear $applicantName,\n\n";
-            $message .= "We are writing to inform you that your construction permit application (ID: #" . str_pad($app_id, 5, '0', STR_PAD_LEFT) . ") has been reviewed.\n\n";
-            $message .= "Application Status: $displayStatus\n";
-            $message .= "Officer Remarks: $remarks\n\n";
+            $message = "Dear $applicantName,<br><br>";
+            $message .= "We are writing to inform you that your construction permit application (ID: #" . str_pad($app_id, 5, '0', STR_PAD_LEFT) . ") has been reviewed.<br><br>";
+            $message .= "<strong>Application Status:</strong> $displayStatus<br>";
+            $message .= "<strong>Officer Remarks:</strong> $remarks<br><br>";
             if ($status === 'Verified') {
-                $message .= "Congratulations! Your application has been APPROVED. You may proceed with your construction activities as per the approved plan.\n";
+                $message .= "Congratulations! Your application has been <strong>APPROVED</strong>. You may proceed with your construction activities as per the approved plan.<br>";
             } else {
-                $message .= "Unfortunately, your application has been REJECTED. Please review the officer's remarks and address the concerns before reapplying.\n";
+                $message .= "Unfortunately, your application has been <strong>REJECTED</strong>. Please review the officer's remarks and address the concerns before reapplying.<br>";
             }
-            $message .= "\nPlease log in to the Sovereign Structures portal to view the full details.\n\nRegards,\nSovereign Structures - Construction Permit Department";
-            @mail($applicantEmail, $subject, $message, "From: noreply@sovereignstructures.in");
+            $message .= "<br>Please log in to the Sovereign Structures portal to view the full details.<br><br>Regards,<br>Sovereign Structures - Construction Permit Department";
+            
+            sendEmail($applicantEmail, $subject, $message);
         }
 
         closeDBConnection($conn);

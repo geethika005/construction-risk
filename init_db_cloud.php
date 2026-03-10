@@ -114,15 +114,22 @@ if ($conn->query($sql)) echo "✅ dashboard_stats view ready<br>";
 $admin_email = 'jijithannickal@gmail.com';
 $admin_pass = 'Ji@123456';
 
-$checkAdmin = $conn->query("SELECT * FROM User WHERE role = 'Admin' OR email = '$admin_email'");
-if ($checkAdmin->num_rows == 0) {
+// Check if this specific email exists
+$checkUser = $conn->query("SELECT * FROM User WHERE email = '$admin_email'");
+
+if ($checkUser->num_rows > 0) {
+    // User exists, force them to be a verified Admin
+    $sql = "UPDATE User SET role = 'Admin', password = '$admin_pass', is_verified = 1 WHERE email = '$admin_email'";
+    if ($conn->query($sql)) echo "✅ Account $admin_email updated to Admin status.<br>";
+} else {
+    // User doesn't exist, create new Admin
     $sql = "INSERT INTO User (name, email, password, role, is_verified) 
             VALUES ('Admin User', '$admin_email', '$admin_pass', 'Admin', 1)";
-    if ($conn->query($sql)) echo "✅ Default Admin created (User: $admin_email, Pass: $admin_pass)<br>";
-} else {
-    $sql = "UPDATE User SET email = '$admin_email', password = '$admin_pass', is_verified = 1 WHERE role = 'Admin' LIMIT 1";
-    if ($conn->query($sql)) echo "✅ Admin credentials updated to: $admin_email / $admin_pass<br>";
+    if ($conn->query($sql)) echo "✅ New Admin created: $admin_email / $admin_pass<br>";
 }
+
+// Also ensure any existing generic "Admin" role is updated
+$conn->query("UPDATE User SET is_verified = 1 WHERE role = 'Admin'");
 
 echo "<br>🎉 **All Set!** Your cloud database is ready. <br>";
 echo "<a href='index.php'>Go to Website</a>";
