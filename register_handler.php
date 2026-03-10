@@ -136,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $stmt->close();
         closeDBConnection($conn);
-        header('Location: login%20(1).php?type=' . urlencode($user_type));
+        header('Location: login.php?type=' . urlencode($user_type));
         exit();
     } else {
         $_SESSION['errors'] = ['general' => 'Registration failed. Please try again.'];

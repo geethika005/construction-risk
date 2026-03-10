@@ -20,12 +20,18 @@ class MLPredictor {
         $this->scriptPath = $this->baseDir . '/predict_cli.py';
         
         // If a virtualenv python exists in project .venv, prefer it
-        $venvPy = $this->baseDir . '/.venv/Scripts/python.exe';
-        if (file_exists($venvPy)) {
-            $this->pythonPath = $venvPy;
+        $venvPyWin = $this->baseDir . '/.venv/Scripts/python.exe';
+        $venvPyLin = $this->baseDir . '/.venv/bin/python';
+        
+        if (file_exists($venvPyWin)) {
+            $this->pythonPath = $venvPyWin;
+        } elseif (file_exists($venvPyLin)) {
+            $this->pythonPath = $venvPyLin;
         } else {
-            // try system python3 or python
-            $this->pythonPath = trim(shell_exec('where python 2>NUL')) ?: 'python';
+            // try system python
+            $this->pythonPath = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') 
+                ? (trim(shell_exec('where python 2>NUL')) ?: 'python')
+                : (trim(shell_exec('which python3 2>/dev/null')) ?: 'python3');
         }
     }
     
