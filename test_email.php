@@ -12,6 +12,15 @@ if (empty($to)) {
 }
 
 echo "<h2>Email Connectivity Test</h2>";
+
+// Debugging checks
+if (empty(SMTP_USER)) {
+    echo "<div style='color: orange;'>⚠️ Warning: SMTP_USER is empty. Please set it in Render Env Vars.</div>";
+}
+if (empty(SMTP_PASS)) {
+    echo "<div style='color: orange;'>⚠️ Warning: SMTP_PASS is empty. Please set it in Render Env Vars.</div>";
+}
+
 echo "Attempting to send a test email to: <strong>$to</strong>...<br><br>";
 
 $subject = "Sovereign Structures - SMTP Test";
