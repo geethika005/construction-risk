@@ -1,0 +1,76 @@
+<?php
+// ==========================================================
+// DATABASE CONFIGURATION (EXAMPLE)
+// ==========================================================
+// Copy this file to config.php and update with your settings
+// ==========================================================
+
+// Database credentials
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', ''); // Update with your MySQL password
+define('DB_NAME', 'construction_risk_db');
+
+// Create database connection
+function getDBConnection() {
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    
+    // Check connection
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+    
+    return $conn;
+}
+
+// Close database connection
+function closeDBConnection($conn) {
+    if ($conn) {
+        $conn->close();
+    }
+}
+
+// Start session
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Global Cache Control
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: 0');
+
+// Set default timezone
+date_default_timezone_set('Asia/Kolkata');
+
+// Base URL configuration (UPDATE THIS to match your local folder)
+define('BASE_URL', 'http://localhost/mini project/');
+
+// Check if user is logged in
+function isLoggedIn() {
+    return isset($_SESSION['user_id']);
+}
+
+// Check user role
+function hasRole($role) {
+    return isset($_SESSION['role']) && $_SESSION['role'] === $role;
+}
+
+// Redirect if not logged in
+function requireLogin() {
+    if (!isLoggedIn()) {
+        header('Location: ' . BASE_URL . 'login (1).php');
+        exit();
+    }
+}
+
+// Redirect if not authorized
+function requireRole($role) {
+    requireLogin();
+    if (!hasRole($role)) {
+        header('Location: ' . BASE_URL . 'unauthorized.php');
+        exit();
+    }
+}
+?>
