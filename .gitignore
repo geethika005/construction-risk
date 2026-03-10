@@ -5,7 +5,6 @@ __pycache__/
 *$py.class
 
 # Environment Variables / Configuration
-config.php
 .env
 
 # Large Data Files (Datasets)
