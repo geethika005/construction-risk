@@ -22,30 +22,36 @@ $sql = "CREATE TABLE IF NOT EXISTS User (
 if ($conn->query($sql)) echo "✅ User table ready<br>";
 
 // 2. Construction_Details Table
-$sql = "CREATE TABLE IF NOT EXISTS Construction_Details (
+$conn->query("DROP VIEW IF EXISTS dashboard_stats");
+$conn->query("DROP VIEW IF EXISTS pending_applications");
+$conn->query("DROP VIEW IF EXISTS application_details");
+$conn->query("DROP TABLE IF EXISTS Site_Verification");
+$conn->query("DROP TABLE IF EXISTS Construction_Details");
+
+$sql = "CREATE TABLE Construction_Details (
     construction_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     district VARCHAR(50) NOT NULL,
     town VARCHAR(50) NOT NULL,
-    avg_elevation_m DOUBLE,
+    average_elevation_m DOUBLE,
     terrain_type VARCHAR(50),
-    avg_rainfall_mm DOUBLE,
+    average_rainfall_mm DOUBLE,
     water_table_depth VARCHAR(50),
     soil_type VARCHAR(50),
     slope_category VARCHAR(50),
     forest_cover_percent DOUBLE,
-    land_use_type VARCHAR(100),
+    land_cover_type VARCHAR(100),
     predicted_flood_risk VARCHAR(50),
     predicted_landslide_risk VARCHAR(50),
     predicted_overall_risk VARCHAR(50),
-    status ENUM('Pending', 'Verified', 'Rejected') DEFAULT 'Pending',
-    submission_date DATE,
+    application_status ENUM('Submitted', 'Verified', 'Rejected') DEFAULT 'Submitted',
+    application_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES User(user_id)
 )";
 if ($conn->query($sql)) echo "✅ Construction_Details table ready<br>";
 
 // 3. Site_Verification Table
-$sql = "CREATE TABLE IF NOT EXISTS Site_Verification (
+$sql = "CREATE TABLE Site_Verification (
     verification_id INT AUTO_INCREMENT PRIMARY KEY,
     construction_id INT NOT NULL,
     verified_by INT NOT NULL,
@@ -91,16 +97,16 @@ $sql = "CREATE VIEW pending_applications AS
     SELECT cd.*, u.name as applicant_name
     FROM Construction_Details cd
     JOIN User u ON cd.user_id = u.user_id
-    WHERE cd.status = 'Pending'";
+    WHERE cd.application_status = 'Submitted'";
 if ($conn->query($sql)) echo "✅ pending_applications view ready<br>";
 
 $sql = "DROP VIEW IF EXISTS dashboard_stats";
 $conn->query($sql);
 $sql = "CREATE VIEW dashboard_stats AS
     SELECT 
-        (SELECT COUNT(*) FROM Construction_Details WHERE status = 'Pending') as pending_count,
-        (SELECT COUNT(*) FROM Construction_Details WHERE status = 'Verified') as verified_count,
-        (SELECT COUNT(*) FROM Construction_Details WHERE status = 'Rejected') as rejected_count,
+        (SELECT COUNT(*) FROM Construction_Details WHERE application_status = 'Submitted') as pending_count,
+        (SELECT COUNT(*) FROM Construction_Details WHERE application_status = 'Verified') as verified_count,
+        (SELECT COUNT(*) FROM Construction_Details WHERE application_status = 'Rejected') as rejected_count,
         (SELECT COUNT(*) FROM User WHERE role = 'Officer' AND is_verified = 0) as pending_officers";
 if ($conn->query($sql)) echo "✅ dashboard_stats view ready<br>";
 
