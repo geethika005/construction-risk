@@ -104,12 +104,18 @@ $sql = "CREATE VIEW dashboard_stats AS
         (SELECT COUNT(*) FROM User WHERE role = 'Officer' AND is_verified = 0) as pending_officers";
 if ($conn->query($sql)) echo "✅ dashboard_stats view ready<br>";
 
-// 6. Create Initial Admin (password is 'admin123')
-$checkAdmin = $conn->query("SELECT * FROM User WHERE role = 'Admin'");
+// 6. Create or Update Initial Admin
+$admin_email = 'jijithannickal@gmail.com';
+$admin_pass = 'Ji@123456';
+
+$checkAdmin = $conn->query("SELECT * FROM User WHERE role = 'Admin' OR email = '$admin_email'");
 if ($checkAdmin->num_rows == 0) {
     $sql = "INSERT INTO User (name, email, password, role, is_verified) 
-            VALUES ('Admin User', 'admin@sovereign.com', 'admin123', 'Admin', 1)";
-    if ($conn->query($sql)) echo "✅ Default Admin created (User: admin@sovereign.com, Pass: admin123)<br>";
+            VALUES ('Admin User', '$admin_email', '$admin_pass', 'Admin', 1)";
+    if ($conn->query($sql)) echo "✅ Default Admin created (User: $admin_email, Pass: $admin_pass)<br>";
+} else {
+    $sql = "UPDATE User SET email = '$admin_email', password = '$admin_pass', is_verified = 1 WHERE role = 'Admin' LIMIT 1";
+    if ($conn->query($sql)) echo "✅ Admin credentials updated to: $admin_email / $admin_pass<br>";
 }
 
 echo "<br>🎉 **All Set!** Your cloud database is ready. <br>";
