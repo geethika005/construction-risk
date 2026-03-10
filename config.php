@@ -10,10 +10,11 @@ define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
 define('DB_USER', getenv('DB_USER') ?: 'root');
 define('DB_PASS', getenv('DB_PASS') ?: ''); // Use Render Env Var for production
 define('DB_NAME', getenv('DB_NAME') ?: 'construction_risk_db');
+define('DB_PORT', getenv('DB_PORT') ?: '3306'); // Default MySQL port for local, will use Render Env Var for cloud
 
 // Create database connection
 function getDBConnection() {
-    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, (int)DB_PORT);
     
     // Check connection
     if ($conn->connect_error) {
