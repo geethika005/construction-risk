@@ -7,55 +7,68 @@ use PHPMailer\PHPMailer\Exception;
 // Check if PHPMailer is installed
 $autoload = __DIR__ . '/vendor/autoload.php';
 if (!file_exists($autoload)) {
-    die("<h2>❌ Error: PHPMailer Not Found</h2><p>Composer dependencies have not been installed on the server yet. Please wait for the Render build to finish or check the build logs for errors.</p>");
+    die("<h2>❌ Error: PHPMailer Not Found</h2><p>Please wait for the Render build to finish.</p>");
 }
 
 require_once $autoload;
 
 $to = isset($_GET['to']) ? $_GET['to'] : SMTP_USER;
 
-echo "<h2>Detailed SMTP Connectivity Test</h2>";
+echo "<h2>Advanced SMTP Multi-Port Test</h2>";
+
+// DNS Check
+$ip = gethostbyname('smtp.gmail.com');
+echo "<strong>DNS Check:</strong> smtp.gmail.com resolved to: <code>$ip</code><br><br>";
 
 if (empty(SMTP_USER) || empty(SMTP_PASS)) {
-    echo "<div style='color: red;'>⚠️ CRITICAL: SMTP_USER or SMTP_PASS is empty. Have you added them to Render Environment Variables?</div>";
+    echo "<div style='color: red;'>⚠️ CRITICAL: SMTP_USER or SMTP_PASS is empty in Render Env Vars.</div>";
 }
 
-echo "Attempting to send a test email to: <strong>$to</strong>...<br><br>";
-echo "<strong>Debug Log:</strong><br><pre style='background: #f4f4f4; padding: 15px; border: 1px solid #ddd;'>";
-
-$mail = new PHPMailer(true);
-
-try {
-    // Server settings
-    $mail->SMTPDebug = 2; // Enable verbose debug output
-    $mail->Debugoutput = 'echo';
+function tryPort($to, $port, $secureType) {
+    echo "<h3>Testing Port $port ($secureType)...</h3>";
+    echo "<pre style='background: #f4f4f4; padding: 10px; border: 1px solid #ddd; max-height: 200px; overflow: auto;'>";
     
-    $mail->isSMTP();
-    $mail->Host       = SMTP_HOST;
-    $mail->SMTPAuth   = true;
-    $mail->Username   = SMTP_USER;
-    $mail->Password   = SMTP_PASS;
-    // Use SMTPS for port 465, STARTTLS for others
-    $mail->SMTPSecure = (SMTP_PORT == 465) ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port       = SMTP_PORT;
+    $mail = new PHPMailer(true);
+    try {
+        $mail->SMTPDebug = 2;
+        $mail->Debugoutput = 'echo';
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = SMTP_USER;
+        $mail->Password   = SMTP_PASS;
+        $mail->SMTPSecure = $secureType;
+        $mail->Port       = $port;
 
-    // Recipients
-    $mail->setFrom(SMTP_USER, SMTP_FROM_NAME);
-    $mail->addAddress($to);
+        // Force IPv4 for test
+        $mail->SMTPOptions = array(
+            'socket' => array(
+                'bindto' => '0.0.0.0:0',
+            ),
+        );
+        $mail->Timeout    = 10; // Shorter timeout for tests
 
-    // Content
-    $mail->isHTML(true);
-    $mail->Subject = "Sovereign Structures - Detailed SMTP Test";
-    $mail->Body    = "<h3>Success!</h3><p>Your SMTP debug test was successful.</p>";
+        $mail->setFrom(SMTP_USER, 'Sovereign Test');
+        $mail->addAddress($to);
+        $mail->Subject = "Sovereign Test - Port $port";
+        $mail->Body    = "Test from port $port";
 
-    $mail->send();
-    echo "</pre>";
-    echo "<div style='color: green; font-weight: bold; margin-top: 20px;'>✅ FINAL RESULT: Success! Email sent.</div>";
-} catch (Exception $e) {
-    echo "</pre>";
-    echo "<div style='color: red; font-weight: bold; margin-top: 20px;'>❌ FINAL RESULT: Failed!</div>";
-    echo "<p>Detailed Error: " . $mail->ErrorInfo . "</p>";
+        $mail->send();
+        echo "</pre>";
+        echo "<b style='color: green;'>✅ Port $port Worked!</b><br>";
+        return true;
+    } catch (Exception $e) {
+        echo "</pre>";
+        echo "<b style='color: red;'>❌ Port $port Failed:</b> " . $mail->ErrorInfo . "<br>";
+        return false;
+    }
 }
 
-echo "<br><a href='index.php'>Return Home</a>";
+// Try 465 first
+if (!tryPort($to, 465, PHPMailer::ENCRYPTION_SMTPS)) {
+    // Then try 587
+    tryPort($to, 587, PHPMailer::ENCRYPTION_STARTTLS);
+}
+
+echo "<br><hr><br><a href='index.php'>Return Home</a>";
 ?>

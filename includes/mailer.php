@@ -36,6 +36,13 @@ function sendEmail($to, $subject, $body, $isHtml = true) {
         $mail->SMTPSecure = (SMTP_PORT == 465) ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = SMTP_PORT;
 
+        // Force IPv4 to avoid "Network unreachable" on some cloud providers
+        $mail->SMTPOptions = array(
+            'socket' => array(
+                'bindto' => '0.0.0.0:0',
+            ),
+        );
+
         // Recipients
         $mail->setFrom(SMTP_USER, SMTP_FROM_NAME);
         $mail->addAddress($to);
