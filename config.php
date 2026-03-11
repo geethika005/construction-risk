@@ -16,7 +16,7 @@ define('DB_PORT', getenv('DB_PORT') ?: '3306'); // Default MySQL port for local,
 define('SMTP_HOST', getenv('SMTP_HOST') ?: 'smtp.gmail.com');
 define('SMTP_USER', getenv('SMTP_USER') ?: ''); // Set in Render Env Var
 define('SMTP_PASS', getenv('SMTP_PASS') ?: ''); // Set in Render Env Var (App Password)
-define('SMTP_PORT', getenv('SMTP_PORT') ?: '587');
+define('SMTP_PORT', getenv('SMTP_PORT') ?: '465');
 define('SMTP_FROM_NAME', 'Sovereign Structures');
 
 // Create database connection
