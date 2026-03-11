@@ -1,38 +1,59 @@
 <?php
 require_once 'config.php';
-require_once 'includes/mailer.php';
 
-// This script helps you test if your Gmail App Password is working on Render.
-// Access it via: https://your-site.onrender.com/test_email.php?to=your-email@example.com
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// Check if PHPMailer is installed
+$autoload = __DIR__ . '/vendor/autoload.php';
+if (!file_exists($autoload)) {
+    die("<h2>❌ Error: PHPMailer Not Found</h2><p>Composer dependencies have not been installed on the server yet. Please wait for the Render build to finish or check the build logs for errors.</p>");
+}
+
+require_once $autoload;
 
 $to = isset($_GET['to']) ? $_GET['to'] : SMTP_USER;
 
-if (empty($to)) {
-    die("Error: Please provide a recipient email in the URL, e.g., ?to=yourname@mail.com");
-}
+echo "<h2>Detailed SMTP Connectivity Test</h2>";
 
-echo "<h2>Email Connectivity Test</h2>";
-
-// Debugging checks
-if (empty(SMTP_USER)) {
-    echo "<div style='color: orange;'>⚠️ Warning: SMTP_USER is empty. Please set it in Render Env Vars.</div>";
-}
-if (empty(SMTP_PASS)) {
-    echo "<div style='color: orange;'>⚠️ Warning: SMTP_PASS is empty. Please set it in Render Env Vars.</div>";
+if (empty(SMTP_USER) || empty(SMTP_PASS)) {
+    echo "<div style='color: red;'>⚠️ CRITICAL: SMTP_USER or SMTP_PASS is empty. Have you added them to Render Environment Variables?</div>";
 }
 
 echo "Attempting to send a test email to: <strong>$to</strong>...<br><br>";
+echo "<strong>Debug Log:</strong><br><pre style='background: #f4f4f4; padding: 15px; border: 1px solid #ddd;'>";
 
-$subject = "Sovereign Structures - SMTP Test";
-$body = "<h3>Success!</h3><p>If you are reading this, your Gmail SMTP connection is working perfectly on Render.com.</p>";
+$mail = new PHPMailer(true);
 
-if (sendEmail($to, $subject, $body)) {
-    echo "<div style='color: green; font-weight: bold;'>✅ SUCCESS: Email sent successfully!</div>";
-    echo "<p>Check your inbox (and spam folder) for the test message.</p>";
-} else {
-    echo "<div style='color: red; font-weight: bold;'>❌ FAILED: Could not send email.</div>";
-    echo "<p>Please check your Render Environment Variables (SMTP_USER and SMTP_PASS).</p>";
-    echo "<p>Current SMTP User: " . SMTP_USER . "</p>";
+try {
+    // Server settings
+    $mail->SMTPDebug = 2; // Enable verbose debug output
+    $mail->Debugoutput = 'echo';
+    
+    $mail->isSMTP();
+    $mail->Host       = SMTP_HOST;
+    $mail->SMTPAuth   = true;
+    $mail->Username   = SMTP_USER;
+    $mail->Password   = SMTP_PASS;
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port       = SMTP_PORT;
+
+    // Recipients
+    $mail->setFrom(SMTP_USER, SMTP_FROM_NAME);
+    $mail->addAddress($to);
+
+    // Content
+    $mail->isHTML(true);
+    $mail->Subject = "Sovereign Structures - Detailed SMTP Test";
+    $mail->Body    = "<h3>Success!</h3><p>Your SMTP debug test was successful.</p>";
+
+    $mail->send();
+    echo "</pre>";
+    echo "<div style='color: green; font-weight: bold; margin-top: 20px;'>✅ FINAL RESULT: Success! Email sent.</div>";
+} catch (Exception $e) {
+    echo "</pre>";
+    echo "<div style='color: red; font-weight: bold; margin-top: 20px;'>❌ FINAL RESULT: Failed!</div>";
+    echo "<p>Detailed Error: " . $mail->ErrorInfo . "</p>";
 }
 
 echo "<br><a href='index.php'>Return Home</a>";

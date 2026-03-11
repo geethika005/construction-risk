@@ -374,7 +374,7 @@ closeDBConnection($conn);
                                 <td><strong><?php echo htmlspecialchars($officer['spark_pen']); ?></strong></td>
                                 <td><?php echo date('d M Y', strtotime($officer['created_at'])); ?></td>
                                 <td>
-                                    <form method="POST" action="verify_officer.php" style="display:inline;">
+                                    <form method="POST" action="verify_officer.php" style="display:inline; margin-left: 5px;">
                                         <input type="hidden" name="officer_id" value="<?php echo $officer['user_id']; ?>">
                                         <input type="hidden" name="action" value="approve">
                                         <button type="submit" class="btn-approve">
