@@ -24,6 +24,22 @@ if (empty(SMTP_USER) || empty(SMTP_PASS)) {
     echo "<div style='color: red;'>⚠️ CRITICAL: SMTP_USER or SMTP_PASS is empty in Render Env Vars.</div>";
 }
 
+echo "<h3>Database Connectivity Test</h3>";
+echo "Testing connection to host: <code>" . DB_HOST . "</code>...<br>";
+try {
+    $testConn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, (int)DB_PORT);
+    if ($testConn->connect_error) {
+        echo "<b style='color: red;'>❌ Database Connection Failed:</b> " . $testConn->connect_error . "<br>";
+    } else {
+        echo "<b style='color: green;'>✅ Database Connection Successful!</b><br>";
+        $testConn->close();
+    }
+} catch (Exception $e) {
+    echo "<b style='color: red;'>❌ Database Error:</b> " . $e->getMessage() . "<br>";
+}
+
+echo "<h3>SMTP Timeout & Encryption Diagnostic</h3>";
+
 function tryPort($to, $port, $secureType) {
     echo "<h3>Testing Port $port (" . ($secureType ?: 'None') . ")...</h3>";
     echo "<pre style='background: #f4f4f4; padding: 10px; border: 1px solid #ddd; max-height: 250px; overflow: auto;'>";
